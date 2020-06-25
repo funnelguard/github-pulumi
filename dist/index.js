@@ -75,18 +75,16 @@ function run() {
         };
         let cmd = "pulumi " + args;
         core.info(`#### :tropical_drink: ${cmd}`);
-        const exitCode = 0; // await exec(cmd, undefined, options);
+        const exitCode = yield exec_1.exec(cmd, undefined, options);
         // # If the GitHub action stems from a Pull Request event, we may optionally
         // # leave a comment if the COMMENT_ON_PR is set.
         if (github.context.payload.pull_request && core.getInput("comment-on-pr")) {
-            let commentsUrl = github.context.payload.pull_request
-                .comments_url;
             let token = core.getInput("github-token");
             if (!token) {
                 core.setFailed("Can't leave a comment, unknown github-token");
             }
             else {
-                // let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
+                let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
                 core.info(`Getting comments`);
                 const octokit = github.getOctokit(token);
                 const existing = yield octokit.issues.listComments({
@@ -119,11 +117,12 @@ function run() {
                         }
                     }
                 }
-                // await gh.create(commentsUrl, { body }, {
-                //     additionalHeaders: {
-                //         Authorization: `token ${token}`
-                //     }
-                // })
+                yield octokit.issues.createComment({
+                    owner: github.context.repo.owner,
+                    repo: github.context.repo.repo,
+                    issue_number: github.context.payload.pull_request.number,
+                    body,
+                });
             }
         }
         process.exit(exitCode);
