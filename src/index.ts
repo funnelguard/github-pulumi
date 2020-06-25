@@ -4,7 +4,6 @@ import { exec } from "@actions/exec";
 
 import * as process from "process";
 import * as fs from "fs";
-import { Octokit } from "@octokit/rest";
 
 const stack = core.getInput("stack", { required: true });
 const args = core.getInput("args", { required: true });
@@ -82,12 +81,12 @@ async function run() {
       // let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
       core.info(`Commenting on PR ${commentsUrl}`);
 
-      const githubClient = new github.GitHub(token);
-      const octokit = (githubClient as any) as Octokit;
+      const octokit = github.getOctokit(token);
+      
       const existing = await octokit.pulls.listComments({
-        owner: "github-actions",
-        pull_number: github.context.payload.pull_request.number,
+        owner: github.context.repo.owner,
         repo: github.context.repo.repo,
+        pull_number: github.context.payload.pull_request.number,
       });
       core.info(`Number of existing comments ${existing.data.length}`);
 
@@ -96,33 +95,21 @@ async function run() {
 
         if (existingComment.body.includes(`Previewing update (${stack}):`)) {
           try {
-          //   mutation {{
-          //   minimizeComment(
-          //     input: {{
-          //       subjectId:""{toRemove.id}"",
-          //       classifier: OUTDATED
-          //     }})
-          //     {{
-          //     minimizedComment {{
-          //       isMinimized
-          //     }}
-          //   }}
-          // }}
             core.info(`Hiding comment ${existingComment.id}`);
             core.info(
               JSON.stringify(
-                await githubClient.graphql(
-                  `{
-                  mutation {
-                    minimizeComment {
-                        clientMutationId
+                await octokit.graphql(
+                  `mutation ($input: MinimizeCommentInput!) {
+                    minimizeComment(input: $input) {
+                      clientMutationId
                     }
-                }
-              }`,
+                  }
+              `,
                   {
                     input: {
                       subjectId: existingComment.id,
-                    },
+                      classifier: 'OUTDATED'
+                    }
                   }
                 )
               )
