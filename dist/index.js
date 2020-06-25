@@ -95,7 +95,7 @@ function run() {
                 core.setFailed("Can't leave a comment, unknown github-token");
             }
             else {
-                let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
+                // let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
                 core.info(`Commenting on PR ${commentsUrl}`);
                 const githubClient = new github.GitHub(token);
                 const octokit = githubClient;
@@ -104,17 +104,20 @@ function run() {
                     pull_number: github.context.payload.pull_request.number,
                     repo: github.context.repo.repo,
                 });
+                core.info(`Number of existing comments ${existing.data.length}`);
                 for (const existingComment of existing.data) {
+                    core.info(`Inspecting existing ${existingComment.body}`);
                     if (existingComment.body.includes(`Previewing update (${stack}):`)) {
-                        console.log(yield githubClient.graphql(`mutation minimizeComment($input: MinimizeCommentInput!){
-                        minimizeComment(input: $input){
-                            clientMutationId
-                        }
-                    }`, {
+                        core.info(`Hiding comment ${existingComment.id}`);
+                        core.info(JSON.stringify(yield githubClient.graphql(`mutation minimizeComment($input: MinimizeCommentInput!){
+                    minimizeComment(input: $input){
+                        clientMutationId
+                    }
+                }`, {
                             input: {
                                 subjectId: existingComment.id,
                             },
-                        }));
+                        })));
                     }
                 }
                 // await gh.create(commentsUrl, { body }, {
