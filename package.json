@@ -1,6 +1,6 @@
 {
   "name": "github-action-pulumi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
@@ -11,6 +11,7 @@
     "@actions/exec": "^1.0.1",
     "@actions/github": "^1.1.0",
     "@actions/io": "^1.0.1",
+    "@octokit/graphql": "^4.5.1",
     "typed-rest-client": "^1.5.0"
   },
   "devDependencies": {

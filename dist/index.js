@@ -109,10 +109,22 @@ function run() {
                     core.info(`Inspecting existing ${existingComment.body}`);
                     if (existingComment.body.includes(`Previewing update (${stack}):`)) {
                         try {
+                            //   mutation {{
+                            //   minimizeComment(
+                            //     input: {{
+                            //       subjectId:""{toRemove.id}"",
+                            //       classifier: OUTDATED
+                            //     }})
+                            //     {{
+                            //     minimizedComment {{
+                            //       isMinimized
+                            //     }}
+                            //   }}
+                            // }}
                             core.info(`Hiding comment ${existingComment.id}`);
                             core.info(JSON.stringify(yield githubClient.graphql(`{
-                  mutation minimizeComment($input: MinimizeCommentInput!){
-                    minimizeComment(input: $input){
+                  mutation {
+                    minimizeComment {
                         clientMutationId
                     }
                 }

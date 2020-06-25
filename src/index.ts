@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { exec } from "@actions/exec";
+
 import * as process from "process";
 import * as fs from "fs";
 import { Octokit } from "@octokit/rest";
@@ -95,13 +96,25 @@ async function run() {
 
         if (existingComment.body.includes(`Previewing update (${stack}):`)) {
           try {
+          //   mutation {{
+          //   minimizeComment(
+          //     input: {{
+          //       subjectId:""{toRemove.id}"",
+          //       classifier: OUTDATED
+          //     }})
+          //     {{
+          //     minimizedComment {{
+          //       isMinimized
+          //     }}
+          //   }}
+          // }}
             core.info(`Hiding comment ${existingComment.id}`);
             core.info(
               JSON.stringify(
                 await githubClient.graphql(
                   `{
-                  mutation minimizeComment($input: MinimizeCommentInput!){
-                    minimizeComment(input: $input){
+                  mutation {
+                    minimizeComment {
                         clientMutationId
                     }
                 }
