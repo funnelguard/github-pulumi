@@ -97,41 +97,28 @@ function run() {
             else {
                 // let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
                 core.info(`Commenting on PR ${commentsUrl}`);
-                const githubClient = new github.GitHub(token);
-                const octokit = githubClient;
+                const octokit = github.getOctokit(token);
                 const existing = yield octokit.pulls.listComments({
-                    owner: "github-actions",
-                    pull_number: github.context.payload.pull_request.number,
+                    owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
+                    pull_number: github.context.payload.pull_request.number,
                 });
                 core.info(`Number of existing comments ${existing.data.length}`);
                 for (const existingComment of existing.data) {
                     core.info(`Inspecting existing ${existingComment.body}`);
                     if (existingComment.body.includes(`Previewing update (${stack}):`)) {
                         try {
-                            //   mutation {{
-                            //   minimizeComment(
-                            //     input: {{
-                            //       subjectId:""{toRemove.id}"",
-                            //       classifier: OUTDATED
-                            //     }})
-                            //     {{
-                            //     minimizedComment {{
-                            //       isMinimized
-                            //     }}
-                            //   }}
-                            // }}
                             core.info(`Hiding comment ${existingComment.id}`);
-                            core.info(JSON.stringify(yield githubClient.graphql(`{
-                  mutation {
-                    minimizeComment {
-                        clientMutationId
+                            core.info(JSON.stringify(yield octokit.graphql(`mutation ($input: MinimizeCommentInput!) {
+                    minimizeComment(input: $input) {
+                      clientMutationId
                     }
-                }
-              }`, {
+                  }
+              `, {
                                 input: {
                                     subjectId: existingComment.id,
-                                },
+                                    classifier: 'OUTDATED'
+                                }
                             })));
                         }
                         catch (err) {
