@@ -108,16 +108,25 @@ function run() {
                 for (const existingComment of existing.data) {
                     core.info(`Inspecting existing ${existingComment.body}`);
                     if (existingComment.body.includes(`Previewing update (${stack}):`)) {
-                        core.info(`Hiding comment ${existingComment.id}`);
-                        core.info(JSON.stringify(yield githubClient.graphql(`mutation minimizeComment($input: MinimizeCommentInput!){
+                        try {
+                            core.info(`Hiding comment ${existingComment.id}`);
+                            core.info(JSON.stringify(yield githubClient.graphql(`{
+                  mutation minimizeComment($input: MinimizeCommentInput!){
                     minimizeComment(input: $input){
                         clientMutationId
                     }
-                }`, {
-                            input: {
-                                subjectId: existingComment.id,
-                            },
-                        })));
+                }
+              }`, {
+                                input: {
+                                    subjectId: existingComment.id,
+                                },
+                            })));
+                        }
+                        catch (err) {
+                            core.info("Request failed: " + JSON.stringify(err.request)); // { query, variables: {}, headers: { authorization: 'token secret123' } }
+                            core.info(err.message); // `invalid cursor` does not appear to be a valid cursor.
+                            core.info(err.data); // { repository: { name: 'probot', ref: null } }
+                        }
                     }
                 }
                 // await gh.create(commentsUrl, { body }, {
