@@ -32,7 +32,6 @@ const core = __importStar(require("@actions/core"));
 const github = __importStar(require("@actions/github"));
 const exec_1 = require("@actions/exec");
 const process = __importStar(require("process"));
-const fs = __importStar(require("fs"));
 const stack = core.getInput("stack", { required: true });
 const args = core.getInput("args", { required: true });
 const root = core.getInput("root");
@@ -60,14 +59,6 @@ switch (mode) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         yield exec_1.exec("pulumi", ["stack", "select", stack]);
-        if (fs.existsSync("package.json")) {
-            if (fs.existsSync("yarn.lock") || core.getInput("yarn")) {
-                yield exec_1.exec("yarn install");
-            }
-            else {
-                yield exec_1.exec("npm install");
-            }
-        }
         var output = "";
         let options = {
             listeners: {
@@ -84,7 +75,7 @@ function run() {
         };
         let cmd = "pulumi " + args;
         core.info(`#### :tropical_drink: ${cmd}`);
-        const exitCode = yield exec_1.exec(cmd, undefined, options);
+        const exitCode = 0; // await exec(cmd, undefined, options);
         // # If the GitHub action stems from a Pull Request event, we may optionally
         // # leave a comment if the COMMENT_ON_PR is set.
         if (github.context.payload.pull_request && core.getInput("comment-on-pr")) {
