@@ -71,7 +71,7 @@ async function run() {
       core.setFailed("Can't leave a comment, unknown github-token");
     } else {
       // let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
-      core.info(`Getting comments for: ${JSON.stringify(github.context)}`);
+      core.info(`Getting comments`);
 
       const octokit = github.getOctokit(token);
 
@@ -81,7 +81,8 @@ async function run() {
         pull_number: github.context.payload.pull_request.number,
         per_page: 100
       });
-      core.info(`Number of existing comments ${existing.data.length}`);
+      
+      core.info(`Number of existing comments ${existing.url}, ${existing.status} ${existing.data.length}`);
 
       for (const existingComment of existing.data) {
         core.info(`Inspecting existing ${existingComment.body}`);
