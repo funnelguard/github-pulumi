@@ -85,8 +85,6 @@ async function run() {
       core.info(`Number of existing comments ${existing.url}, ${existing.status} ${existing.data.length}`);
 
       for (const existingComment of existing.data) {
-        core.info(`Inspecting existing ${existingComment.body}`);
-
         if (existingComment.body.includes(`Previewing update (${stack}):`)) {
           try {
             core.info(`Hiding comment ${existingComment.id}`);
@@ -101,7 +99,7 @@ async function run() {
               `,
                   {
                     input: {
-                      subjectId: existingComment.id,
+                      subjectId: existingComment.node_id,
                       classifier: 'OUTDATED'
                     }
                   }
