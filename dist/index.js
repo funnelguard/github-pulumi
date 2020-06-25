@@ -89,10 +89,10 @@ function run() {
                 // let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
                 core.info(`Getting comments`);
                 const octokit = github.getOctokit(token);
-                const existing = yield octokit.pulls.listReviewComments({
+                const existing = yield octokit.issues.listComments({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
-                    pull_number: github.context.payload.pull_request.number,
+                    issue_number: github.context.payload.pull_request.number,
                     per_page: 100
                 });
                 core.info(`Number of existing comments ${existing.url}, ${existing.status} ${existing.data.length}`);
