@@ -96,12 +96,13 @@ function run() {
             }
             else {
                 // let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
-                core.info(`Commenting on PR ${commentsUrl}`);
+                core.info(`Getting comments for: ${JSON.stringify(github.context)}`);
                 const octokit = github.getOctokit(token);
                 const existing = yield octokit.pulls.listReviewComments({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
                     pull_number: github.context.payload.pull_request.number,
+                    per_page: 100
                 });
                 core.info(`Number of existing comments ${existing.data.length}`);
                 for (const existingComment of existing.data) {
