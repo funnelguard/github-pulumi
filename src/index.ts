@@ -83,7 +83,7 @@ async function run() {
 
       const octokit = github.getOctokit(token);
       
-      const existing = await octokit.pulls.listComments({
+      const existing = await octokit.pulls.listReviewComments({
         owner: github.context.repo.owner,
         repo: github.context.repo.repo,
         pull_number: github.context.payload.pull_request.number,

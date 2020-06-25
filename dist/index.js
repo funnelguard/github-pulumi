@@ -98,7 +98,7 @@ function run() {
                 // let body = `#### :tropical_drink: \`${cmd}\`\n\`\`\`\n${output}\n\`\`\``;
                 core.info(`Commenting on PR ${commentsUrl}`);
                 const octokit = github.getOctokit(token);
-                const existing = yield octokit.pulls.listComments({
+                const existing = yield octokit.pulls.listReviewComments({
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
                     pull_number: github.context.payload.pull_request.number,
