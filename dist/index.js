@@ -73,13 +73,14 @@ function run() {
             },
             ignoreReturnCode: true,
         };
-        let cmd = "pulumi " + args;
+        const cmd = "pulumi " + args;
         core.info(`#### :tropical_drink: ${cmd}`);
         const exitCode = yield exec_1.exec(cmd, undefined, options);
         // # If the GitHub action stems from a Pull Request event, we may optionally
         // # leave a comment if the COMMENT_ON_PR is set.
         if (github.context.payload.pull_request && core.getInput("comment-on-pr")) {
-            let token = core.getInput("github-token");
+            const updateComment = core.getInput("update-existing-comment") || true;
+            const token = core.getInput("github-token");
             if (!token) {
                 core.setFailed("Can't leave a comment, unknown github-token");
             }
@@ -91,24 +92,37 @@ function run() {
                     owner: github.context.repo.owner,
                     repo: github.context.repo.repo,
                     issue_number: github.context.payload.pull_request.number,
-                    per_page: 100
+                    per_page: 100,
                 });
                 core.info(`Number of existing comments ${existing.url}, ${existing.status} ${existing.data.length}`);
+                let commentUpdated = false;
                 for (const existingComment of existing.data) {
                     if (existingComment.body.includes(`Previewing update (${stack}):`)) {
                         try {
-                            core.info(`Hiding comment ${existingComment.id}`);
-                            core.info(JSON.stringify(yield octokit.graphql(`mutation ($input: MinimizeCommentInput!) {
+                            if (updateComment) {
+                                core.info(`Updating comment ${existingComment.id}`);
+                                yield octokit.issues.updateComment({
+                                    comment_id: existingComment.id,
+                                    owner: github.context.repo.owner,
+                                    repo: github.context.repo.repo,
+                                    body,
+                                });
+                                commentUpdated = true;
+                            }
+                            else {
+                                core.info(`Hiding comment ${existingComment.id}`);
+                                core.info(JSON.stringify(yield octokit.graphql(`mutation ($input: MinimizeCommentInput!) {
                     minimizeComment(input: $input) {
                       clientMutationId
                     }
                   }
               `, {
-                                input: {
-                                    subjectId: existingComment.node_id,
-                                    classifier: 'OUTDATED'
-                                }
-                            })));
+                                    input: {
+                                        subjectId: existingComment.node_id,
+                                        classifier: "OUTDATED",
+                                    },
+                                })));
+                            }
                         }
                         catch (err) {
                             core.info("Request failed: " + JSON.stringify(err.request)); // { query, variables: {}, headers: { authorization: 'token secret123' } }
@@ -117,12 +131,14 @@ function run() {
                         }
                     }
                 }
-                yield octokit.issues.createComment({
-                    owner: github.context.repo.owner,
-                    repo: github.context.repo.repo,
-                    issue_number: github.context.payload.pull_request.number,
-                    body,
-                });
+                if (!commentUpdated) {
+                    yield octokit.issues.createComment({
+                        owner: github.context.repo.owner,
+                        repo: github.context.repo.repo,
+                        issue_number: github.context.payload.pull_request.number,
+                        body,
+                    });
+                }
             }
         }
         process.exit(exitCode);
