@@ -38,14 +38,6 @@ const root = core.getInput("root");
 if (root) {
     process.chdir(root);
 }
-const workflow = github.context.workflow;
-if (workflow) {
-    core.exportVariable("PULUMI_CI_SYSTEM", "GitHub");
-    core.exportVariable("PULUMI_CI_BUILD_ID", "");
-    core.exportVariable("PULUMI_CI_BUILD_TYPE", "");
-    core.exportVariable("PULUMI_CI_BUILD_URL", "");
-    core.exportVariable("PULUMI_CI_PULL_REQUEST_SHA", github.context.sha);
-}
 const mode = core.getInput("mode");
 switch (mode) {
     case "pr":

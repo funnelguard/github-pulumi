@@ -18,7 +18,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install Pulumi CLI
-      uses: pulumi/action-install-pulumi-cli@releases/v1
+      uses: pulumi/action-install-pulumi-cli@v1.0.1
 
     - uses: JakeGinnivan/github-pulumi@master
       with:
